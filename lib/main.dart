@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'page1.dart';
 import 'page2.dart';
 import 'page3.dart';
 import 'page4.dart';
 import 'page5.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await initializeFirebase();
+    runApp(const MyApp());
+  } catch (e) {
+    runApp(FirebaseErrorApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -80,6 +88,33 @@ class _MyHomePageState extends State<MyHomePage> {
             label: '最新動態',
           ),
         ],
+      ),
+    );
+  }
+}
+
+Future<void> initializeFirebase() async {
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(Duration(seconds: 10));
+  } catch (e) {
+    print("Firebase initialization failed: $e");
+    throw e;
+  }
+}
+
+class FirebaseErrorApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Firebase Initialization Error'),
+        ),
+        body: const Center(
+          child: Text('Failed to initialize Firebase. Please try again later.'),
+        ),
       ),
     );
   }

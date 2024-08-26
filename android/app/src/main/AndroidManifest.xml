@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.unieater">
     <application
         android:label="unieater"
         android:name="${applicationName}"
@@ -30,7 +30,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data 
+        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="YOUR_API_KEY"/>
     </application>

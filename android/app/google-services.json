@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "908583080871",
+    "project_id": "unieater-561c4",
+    "storage_bucket": "unieater-561c4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908583080871:android:f748b8a806f3cdf04fdc82",
+        "android_client_info": {
+          "package_name": "com.example.unieater"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIEr6JP-QR1JOHjmn0QH-h7UUhc-GJ5O4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

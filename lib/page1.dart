@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'restaurant_info.dart';
 
 class Page1 extends StatefulWidget {
@@ -44,17 +45,35 @@ class _Page1State extends State<Page1> {
           ? const Center(child: CircularProgressIndicator())
           : currentLocation == null
               ? const Center(child: Text('Unable to get location'))
-              : GoogleMap(
-                  onMapCreated: (GoogleMapController controller) =>
-                      mapController = controller,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(currentLocation!.latitude!,
-                        currentLocation!.longitude!),
-                    zoom: 14.0,
-                  ),
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  markers: _createMarkers(),
+              : FutureBuilder<Set<Marker>>(
+                  future: _createMarkers(),
+                  builder: (context, snapshot) {
+                    print("ConnectionState: ${snapshot.connectionState}");
+                    if (snapshot.hasError) {
+                      print("Error: ${snapshot.error}");
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                          child: CircularProgressIndicator()); //waiting
+                    } else if (snapshot.hasData) {
+                      return GoogleMap(
+                        onMapCreated: (GoogleMapController controller) =>
+                            mapController = controller,
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(currentLocation!.latitude!,
+                              currentLocation!.longitude!),
+                          zoom: 14.0,
+                        ),
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: false,
+                        markers: snapshot.data ?? {},
+                      );
+                    } else {
+                      return const Center(
+                          child: Text('Failed to load markers'));
+                    }
+                  },
                 ),
     );
   }
@@ -214,31 +233,39 @@ class _Page1State extends State<Page1> {
   }
 
   //pin the store location
-  //TODO : database, icon
-  Set<Marker> _createMarkers() {
-    return {
-      Marker(
-        markerId: const MarkerId("exampleMarker"),
-        position: const LatLng(25.0130057, 121.5402865),
-        infoWindow: const InfoWindow(
-          title: "台科大學餐",
-          snippet: "最頂的學餐",
+  //TODO : ~~database~~, icon
+  Future<Set<Marker>> _createMarkers() async {
+    final storeSnapshot = await FirebaseFirestore.instance
+        .collection('university')
+        .doc('test')
+        .collection('stores')
+        .doc('store_test')
+        .get();
+
+    final storeData = storeSnapshot.data();
+
+    if (storeData != null) {
+      return {
+        Marker(
+          markerId: MarkerId(storeData['name']),
+          position: LatLng(storeData['latitude'], storeData['longitude']),
+          infoWindow: InfoWindow(
+            title: storeData['name'],
+            snippet: storeData['description'],
+          ),
+          onTap: () {
+            _showBottomSheet(
+              context,
+              storeData['name'],
+              storeData['hours'],
+              storeData['address'],
+            );
+          },
         ),
-        onTap: () {
-          _showBottomSheet(context, "台科大學餐", "11:30 - 20:00", "台北市忠孝東路三段一號");
-        },
-      ),
-      Marker(
-        markerId: const MarkerId("測試餐廳"),
-        position: const LatLng(37.3323603, -122.0316901),
-        infoWindow: const InfoWindow(
-          title: "測試餐廳",
-          snippet: "一間測試餐廳",
-        ),
-        onTap: () {
-          _showBottomSheet(context, "測試餐廳", "11:30 - 20:00", "台北市忠孝東路三段一號");
-        },
-      ),
-    };
+      };
+    } else {
+      print("No document found");
+      return {};
+    }
   }
 }
