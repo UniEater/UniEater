@@ -54,8 +54,9 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text('UniEater'),
       ),
-      body: Center(
-        child: _pages.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
